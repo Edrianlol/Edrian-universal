@@ -1,0 +1,182 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "EdrianUniversal"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create main frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 400)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+mainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+mainFrame.BorderSizePixel = 0
+mainFrame.Draggable = true
+mainFrame.Active = true
+mainFrame.Parent = screenGui
+
+-- Create title label
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "EdrianUniversal"
+titleLabel.TextColor3 = Color3.new(0, 0, 1)
+titleLabel.Font = Enum.Font.SourceSans
+titleLabel.TextSize = 24
+titleLabel.Parent = mainFrame
+
+-- Create speed checkbox
+local speedCheckbox = Instance.new("TextButton")
+speedCheckbox.Size = UDim2.new(0, 200, 0, 50)
+speedCheckbox.Position = UDim2.new(0, 50, 0, 60)
+speedCheckbox.BackgroundColor3 = Color3.new(0, 1, 0)
+speedCheckbox.Text = "Speed"
+speedCheckbox.Parent = mainFrame
+
+-- Create speed input bar
+local speedInput = Instance.new("TextBox")
+speedInput.Size = UDim2.new(0, 200, 0, 50)
+speedInput.Position = UDim2.new(0, 50, 0, 120)
+speedInput.BackgroundColor3 = Color3.new(0, 1, 0)
+speedInput.PlaceholderText = "Type your speed"
+speedInput.Text = ""
+speedInput.Parent = mainFrame
+
+-- Create username input bar
+local usernameInput = Instance.new("TextBox")
+usernameInput.Size = UDim2.new(0, 200, 0, 50)
+usernameInput.Position = UDim2.new(0, 50, 0, 180)
+usernameInput.BackgroundColor3 = Color3.new(0, 1, 0)
+usernameInput.PlaceholderText = "Type Username"
+usernameInput.Text = ""
+usernameInput.Parent = mainFrame
+
+-- Create teleport button
+local teleportButton = Instance.new("TextButton")
+teleportButton.Size = UDim2.new(0, 200, 0, 50)
+teleportButton.Position = UDim2.new(0, 50, 0, 240)
+teleportButton.BackgroundColor3 = Color3.new(0, 1, 0)
+teleportButton.Text = "Teleport"
+teleportButton.Parent = mainFrame
+
+-- Create highlight checkbox
+local highlightCheckbox = Instance.new("TextButton")
+highlightCheckbox.Size = UDim2.new(0, 200, 0, 50)
+highlightCheckbox.Position = UDim2.new(0, 50, 0, 300)
+highlightCheckbox.BackgroundColor3 = Color3.new(0, 1, 0)
+highlightCheckbox.Text = "Highlight"
+highlightCheckbox.Parent = mainFrame
+
+-- Create aimbot button
+local aimbotButton = Instance.new("TextButton")
+aimbotButton.Size = UDim2.new(0, 200, 0, 50)
+aimbotButton.Position = UDim2.new(0, 50, 0, 360)
+aimbotButton.BackgroundColor3 = Color3.new(0, 1, 0)
+aimbotButton.Text = "Aimbot"
+aimbotButton.Parent = mainFrame
+
+-- Create close button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 200, 0, 50)
+closeButton.Position = UDim2.new(0, 50, 0, 420)
+closeButton.BackgroundColor3 = Color3.new(0, 1, 0)
+closeButton.Text = "Close"
+closeButton.Parent = mainFrame
+
+-- Functions
+local function setSpeed(enabled)
+    local speed = tonumber(speedInput.Text)
+    if enabled and speed then
+        Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    else
+        Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16 -- Default speed
+    end
+end
+
+local function teleportToPlayer()
+    local username = usernameInput.Text:lower()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Name:lower():sub(1, #username) == username or player.DisplayName:lower():sub(1, #username) == username then
+            Players.LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+            break
+        end
+    end
+end
+
+local function highlightPlayers(enabled)
+    while enabled do
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= Players.LocalPlayer then
+                local highlight = player.Character:FindFirstChild("Highlight")
+                if not highlight then
+                    highlight = Instance.new("Highlight")
+                    highlight.Name = "Highlight"
+                    highlight.FillColor = Color3.new(0, 0, 1)
+                    highlight.FillTransparency = 0.5
+                    highlight.Parent = player.Character
+                end
+            end
+        end
+        wait(5)
+    end
+
+    if not enabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= Players.LocalPlayer then
+                local highlight = player.Character:FindFirstChild("Highlight")
+                if highlight then
+                    highlight:Destroy()
+                end
+            end
+        end
+    end
+end
+
+local function aimbotEnabled(enabled)
+    if enabled then
+        RunService:BindToRenderStep("Aimbot", Enum.RenderPriority.Character.Value, function()
+            local target = nil
+            local shortestDistance = math.huge
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                    local distance = (Players.LocalPlayer.Character.Head.Position - player.Character.Head.Position).Magnitude
+                    if distance < shortestDistance then
+                        shortestDistance = distance
+                        target = player.Character.Head
+                    end
+                end
+            end
+            if target then
+                Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Players.LocalPlayer.Character.HumanoidRootPart.Position, target.Position)
+            end
+        end)
+    else
+        RunService:UnbindFromRenderStep("Aimbot")
+    end
+end
+
+-- Event listeners
+speedCheckbox.MouseButton1Click:Connect(function()
+    setSpeed(not speedCheckbox.Selected)
+    speedCheckbox.Selected = not speedCheckbox.Selected
+end)
+
+teleportButton.MouseButton1Click:Connect(function()
+    teleportToPlayer()
+end)
+
+highlightCheckbox.MouseButton1Click:Connect(function()
+    highlightPlayers(not highlightCheckbox.Selected)
+    highlightCheckbox.Selected = not highlightCheckbox.Selected
+end)
+
+aimbotButton.MouseButton1Click:Connect(function()
+    aimbotEnabled(not aimbotButton.Selected)
+    aimbotButton.Selected = not aimbotButton.Selected
+end)
+
+closeButton.MouseButton1Click:Connect(function()
+    screenGui.Enabled = false
+end)
